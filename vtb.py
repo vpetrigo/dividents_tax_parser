@@ -80,4 +80,12 @@ if __name__ == "__main__":
     result = basic_parser(args.csvfile)
 
     for e in result:
-        print(e)
+        print(
+            "=" * 70,
+            e[0].strftime("%d.%M.%Y"),
+            f"Дивиденды: {e[1]}",
+            f"Компания: {e[2]}",
+            f"Налог: {e[3]} {e[4]}",
+            "=" * 70,
+            sep="\n"
+        )
