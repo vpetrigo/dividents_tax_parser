@@ -4,10 +4,18 @@ import csv
 import datetime
 import pathlib
 import collections
+import logging
 from operator import itemgetter
 from typing import Tuple, Union, List, Iterator, Optional
 
 _tax_tuple = collections.namedtuple("TaxTuple", ["tax", "currency"])
+_logger = logging.getLogger(__name__)
+_logger.setLevel(logging.DEBUG)
+_stream = logging.StreamHandler()
+_stream.setLevel(logging.DEBUG)
+_formatter = logging.Formatter("{name} - {asctime} [{levelname}]: {message}", style="{")
+_stream.setFormatter(_formatter)
+_logger.addHandler(_stream)
 
 
 def extract_company(vtb_comment: str) -> str:
@@ -79,13 +87,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
     result = basic_parser(args.csvfile)
 
-    for e in result:
-        print(
-            "=" * 70,
-            e[0].strftime("%d.%M.%Y"),
-            f"Дивиденды: {e[1]}",
-            f"Компания: {e[2]}",
-            f"Налог: {e[3]} {e[4]}",
-            "=" * 70,
-            sep="\n"
-        )
+    with open("output.csv", "w", newline="") as out:
+        output_csv = csv.writer(out)
+        output_csv.writerow(["Дата", "Дивиденды", "Компания", "Налог"])
+
+        for e in result:
+            output_csv.writerow((e[0].strftime("%d.%M.%Y"), e[1], e[2], f"{e[3]} {e[4]}"))
+            _logger.debug(
+                "\n{}\n{}\n{}\n{}\n{}\n{}".format(
+                    "=" * 70, e[0].strftime("%d.%M.%Y"), f"Дивиденды: {e[1]}",
+                    f"Компания: {e[2]}", f"Налог: {e[3]} {e[4]}", "=" * 70
+                )
+            )
